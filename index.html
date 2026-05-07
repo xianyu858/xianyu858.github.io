@@ -564,6 +564,209 @@ button { border: none; background: none; cursor: pointer; font: inherit; color: 
 }
 
 /* ============================================================
+   PROJECT MODAL — 作品详情弹窗
+   ============================================================ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(8px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .4s var(--ease);
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+.modal-panel {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: min(720px, 92vw); z-index: 910;
+  background: var(--c-bg); overflow-y: auto; overflow-x: hidden;
+  transform: translateX(100%);
+  transition: transform .5s cubic-bezier(.22,1,.36,1);
+}
+.modal-overlay.open .modal-panel { transform: translateX(0); }
+
+/* 弹窗波点 */
+.modal-panel::before {
+  content: ''; position: fixed; top: 0; right: 0; bottom: 0;
+  width: min(720px, 92vw); z-index: 0; pointer-events: none;
+  background-image: radial-gradient(circle, var(--dot-light) 1px, transparent 1px);
+  background-size: var(--dot-size) var(--dot-size);
+}
+
+.modal-close {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 28px; background: var(--c-bg);
+  border-bottom: 1px solid var(--c-border);
+  font-family: var(--f-display); font-size: .7rem;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--c-muted); cursor: pointer;
+  transition: color .22s;
+}
+.modal-close:hover { color: var(--c-text); }
+.modal-close svg { transition: transform .22s; }
+.modal-close:hover svg { transform: translateX(-3px); }
+
+.modal-body { padding: 0 36px 60px; position: relative; z-index: 1; }
+
+/* 封面大图 */
+.modal-cover {
+  width: 100%; aspect-ratio: 16/9; border-radius: 6px; overflow: hidden;
+  margin-bottom: 36px; background: var(--c-surface2);
+}
+.modal-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.modal-cover-placeholder {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; opacity: .15; filter: grayscale(1);
+}
+
+/* 项目信息头部 */
+.modal-info { margin-bottom: 40px; }
+.modal-cat {
+  font-size: .65rem; font-weight: 600; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--c-muted); margin-bottom: 12px;
+}
+.modal-title {
+  font-family: var(--f-display); font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700; letter-spacing: -.03em; color: var(--c-text);
+  line-height: 1.15; margin-bottom: 10px;
+}
+.modal-subtitle {
+  font-size: .88rem; color: var(--c-muted); line-height: 1.6; margin-bottom: 20px;
+}
+.modal-meta {
+  display: flex; flex-wrap: wrap; gap: 24px; padding-top: 18px;
+  border-top: 1px solid var(--c-border);
+}
+.modal-meta-item { display: flex; flex-direction: column; gap: 4px; }
+.modal-meta-label {
+  font-size: .62rem; font-weight: 600; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--c-muted2);
+}
+.modal-meta-value { font-size: .84rem; color: var(--c-text); font-weight: 500; }
+
+/* 内容段落 */
+.modal-section { margin-bottom: 40px; }
+.modal-section-title {
+  font-family: var(--f-display); font-size: .72rem; font-weight: 600;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--c-text);
+  margin-bottom: 16px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--c-border);
+}
+.modal-section p {
+  font-size: .9rem; color: var(--c-muted); line-height: 1.85;
+}
+
+/* 画廊网格 */
+.modal-gallery {
+  display: grid; gap: 6px; margin-bottom: 40px;
+}
+.modal-gallery.g-2 { grid-template-columns: repeat(2, 1fr); }
+.modal-gallery.g-3 { grid-template-columns: repeat(3, 1fr); }
+.modal-gallery-item {
+  border-radius: 4px; overflow: hidden; aspect-ratio: 4/3;
+  background: var(--c-surface2); cursor: pointer;
+  transition: opacity .22s, transform .22s;
+  position: relative;
+}
+.modal-gallery-item:hover { opacity: .85; transform: scale(1.015); }
+.modal-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.modal-gallery-item .gallery-placeholder {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; opacity: .1; filter: grayscale(1);
+}
+.modal-gallery-item .gallery-zoom-hint {
+  position: absolute; top: 8px; right: 8px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .22s;
+}
+.modal-gallery-item:hover .gallery-zoom-hint { opacity: 1; }
+
+/* 视频嵌入 */
+.modal-video-wrap {
+  width: 100%; aspect-ratio: 16/9; border-radius: 6px; overflow: hidden;
+  background: var(--c-inv-bg); margin-bottom: 12px;
+  position: relative;
+}
+.modal-video-wrap iframe { width: 100%; height: 100%; border: none; }
+.modal-video-wrap video { width: 100%; height: 100%; object-fit: cover; }
+
+/* 视频画廊 — 多视频网格 */
+.modal-videos {
+  display: grid; gap: 8px; margin-bottom: 40px;
+}
+.modal-videos.v-1 { grid-template-columns: 1fr; }
+.modal-videos.v-2 { grid-template-columns: repeat(2, 1fr); }
+.modal-videos.v-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* 视频缩略图卡片（用于可点击全屏的视频） */
+.modal-video-card {
+  position: relative; aspect-ratio: 16/9; border-radius: 6px; overflow: hidden;
+  background: var(--c-inv-bg); cursor: pointer;
+  transition: opacity .22s;
+}
+.modal-video-card:hover { opacity: .85; }
+.modal-video-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.modal-video-card .video-play-btn {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .22s, background .22s;
+}
+.modal-video-card:hover .video-play-btn { transform: translate(-50%,-50%) scale(1.08); background: rgba(0,0,0,.8); }
+.video-play-btn svg { margin-left: 3px; }
+.modal-video-card .video-card-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 10px 14px; background: linear-gradient(transparent, rgba(0,0,0,.7));
+  font-size: .78rem; color: #fff; font-weight: 500;
+}
+.modal-video-card .video-placeholder {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; opacity: .12; filter: grayscale(1);
+}
+
+/* 标签 */
+.modal-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
+.modal-tag {
+  font-family: var(--f-display); font-size: .65rem; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--c-muted);
+  border: 1px solid var(--c-border); padding: 6px 14px;
+}
+
+/* 图片/视频灯箱（弹窗内的全屏预览） */
+.lightbox-overlay {
+  position: fixed; inset: 0; z-index: 920;
+  background: rgba(0,0,0,.92); display: none;
+  align-items: center; justify-content: center; cursor: zoom-out;
+  flex-direction: column;
+}
+.lightbox-overlay.open { display: flex; }
+.lightbox-overlay img {
+  max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 4px;
+}
+.lightbox-overlay video {
+  max-width: 90vw; max-height: 85vh; border-radius: 6px; outline: none;
+}
+.lightbox-overlay iframe {
+  width: 90vw; height: 80vh; border: none; border-radius: 6px;
+}
+.lightbox-close-hint {
+  margin-top: 16px; font-size: .7rem; color: rgba(255,255,255,.35);
+  letter-spacing: .12em; text-transform: uppercase;
+  font-family: var(--f-display);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .modal-panel { width: 100vw; }
+  .modal-panel::before { width: 100vw; }
+  .modal-body { padding: 0 20px 40px; }
+  .modal-meta { gap: 16px; }
+  .modal-gallery.g-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ============================================================
    FOOTER
    ============================================================ */
 footer {
@@ -751,7 +954,7 @@ footer {
 
     <div class="works-grid" id="worksGrid">
       <!-- 摄影 -->
-      <div class="work-item reveal d1" data-cat="photo">
+      <div class="work-item reveal d1" data-cat="photo" data-id="photo-1">
         <div class="work-cover cover-1"><div class="work-cover-icon">📷</div></div>
         <div class="work-overlay">
           <div class="work-cat-tag">Photography</div>
@@ -760,7 +963,7 @@ footer {
         </div>
         <div class="work-index">01</div>
       </div>
-      <div class="work-item reveal d2" data-cat="photo">
+      <div class="work-item reveal d2" data-cat="photo" data-id="photo-2">
         <div class="work-cover cover-4"><div class="work-cover-icon">🌊</div></div>
         <div class="work-overlay">
           <div class="work-cat-tag">Photography</div>
@@ -769,7 +972,7 @@ footer {
         </div>
         <div class="work-index">02</div>
       </div>
-      <div class="work-item reveal d3" data-cat="photo">
+      <div class="work-item reveal d3" data-cat="photo" data-id="photo-3">
         <div class="work-cover cover-6"><div class="work-cover-icon">🏙</div></div>
         <div class="work-overlay">
           <div class="work-cat-tag">Photography</div>
@@ -779,7 +982,7 @@ footer {
         <div class="work-index">03</div>
       </div>
       <!-- 游戏 -->
-      <div class="work-item reveal d1" data-cat="game">
+      <div class="work-item reveal d1" data-cat="game" data-id="game-1">
         <div class="work-cover cover-2"><div class="work-cover-icon">🎮</div></div>
         <div class="work-overlay">
           <div class="work-cat-tag">Game Art</div>
@@ -788,7 +991,7 @@ footer {
         </div>
         <div class="work-index">04</div>
       </div>
-      <div class="work-item reveal d2" data-cat="game">
+      <div class="work-item reveal d2" data-cat="game" data-id="game-2">
         <div class="work-cover cover-3"><div class="work-cover-icon">🌌</div></div>
         <div class="work-overlay">
           <div class="work-cat-tag">Game Art</div>
@@ -797,7 +1000,7 @@ footer {
         </div>
         <div class="work-index">05</div>
       </div>
-      <div class="work-item reveal d3" data-cat="game">
+      <div class="work-item reveal d3" data-cat="game" data-id="game-3">
         <div class="work-cover cover-8"><div class="work-cover-icon">⚔️</div></div>
         <div class="work-overlay">
           <div class="work-cat-tag">Game Art</div>
@@ -807,7 +1010,7 @@ footer {
         <div class="work-index">06</div>
       </div>
       <!-- 视频 -->
-      <div class="work-item reveal d1" data-cat="video">
+      <div class="work-item reveal d1" data-cat="video" data-id="video-1">
         <div class="work-cover cover-7"><div class="work-cover-icon">🎬</div></div>
         <div class="work-overlay">
           <div class="work-cat-tag">Film / Video</div>
@@ -816,7 +1019,7 @@ footer {
         </div>
         <div class="work-index">07</div>
       </div>
-      <div class="work-item reveal d2" data-cat="video">
+      <div class="work-item reveal d2" data-cat="video" data-id="video-2">
         <div class="work-cover cover-5"><div class="work-cover-icon">📹</div></div>
         <div class="work-overlay">
           <div class="work-cat-tag">Film / Video</div>
@@ -825,7 +1028,7 @@ footer {
         </div>
         <div class="work-index">08</div>
       </div>
-      <div class="work-item reveal d3" data-cat="video">
+      <div class="work-item reveal d3" data-cat="video" data-id="video-3">
         <div class="work-cover cover-9"><div class="work-cover-icon">🎞</div></div>
         <div class="work-overlay">
           <div class="work-cat-tag">Film / Video</div>
@@ -998,6 +1201,24 @@ footer {
 </footer>
 
 <!-- ======================================================
+     PROJECT MODAL — 作品详情弹窗
+     ====================================================== -->
+<div class="modal-overlay" id="projectModal">
+  <div class="modal-panel">
+    <div class="modal-close" id="modalClose">
+      <span>← 返回作品集</span>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <!-- 由 JS 动态填充 -->
+    </div>
+  </div>
+</div>
+
+<!-- 灯箱（图片/视频全屏预览） -->
+<div class="lightbox-overlay" id="lightbox"></div>
+
+<!-- ======================================================
      JAVASCRIPT
      ====================================================== -->
 <script>
@@ -1012,6 +1233,483 @@ const CATEGORY_CONFIG = {
   // 新增示例（取消注释后在 HTML work-item 上加 data-cat="design"）：
   // design: '平面设计',
 };
+
+/* ============================================================
+   ★★★ 作品数据配置 ★★★
+   ——————————————————————————————————————————————————————
+   修改/新增作品只需编辑这个对象！
+   
+   字段说明：
+   cover       → 封面图路径（留空则用渐变色占位）
+   coverIcon   → 封面图标 emoji（有封面图时可留空）
+   cat         → 分类 key（对应 CATEGORY_CONFIG）
+   catLabel    → 分类显示名
+   title       → 作品标题
+   subtitle    → 副标题/一句话描述
+   author      → 作者（单人或小组，多人用 · 分隔）
+   date        → 创作时间
+   role        → 担任角色
+   tools       → 使用工具
+   origin      → 项目发起缘由
+   process     → 项目设计过程
+   result      → 项目成果/总结
+   gallery     → 图集数组，每项 { src: 图片路径, alt: 描述 }
+                  （留空 src 则用占位色块，有 src 的图片点击可灯箱放大）
+   video       → 单个视频（兼容旧格式）{ type: 'iframe'|'video', src: 链接 }
+   videos      → 多视频数组，每项 { type, src, thumb(缩略图), label(标题) }
+                  （type='iframe' 用于B站/YouTube嵌入，type='video' 用于本地视频）
+                  （有 thumb 时显示缩略图卡片+播放按钮，点击可全屏播放）
+   tags        → 标签数组
+   ============================================================ */
+const WORKS_DATA = {
+  'photo-1': {
+    cover: '',
+    coverIcon: '📷',
+    cat: 'photo',
+    catLabel: 'Photography',
+    title: '城市暮光',
+    subtitle: '街头纪实 · 黄金时段光线捕捉',
+    author: 'Alex Chen',
+    date: '2025.03',
+    role: '摄影师 / 后期',
+    tools: 'Sony A7IV · Lightroom · Photoshop',
+    origin: '生活在城市中，每天重复经过同一条街、同一座桥，却很少真正停下来看光线如何改变这些熟悉的场景。这个项目源于一个简单的念头：如果在同一个路口站足一个黄昏，会看到什么？于是我开始在下班后的黄金时段，穿行于城市的不同角落，用镜头记录那些转瞬即逝的光影瞬间。',
+    process: '拍摄持续了三个月，覆盖了城市中十余个观测点。每次拍摄前，我会提前到达选定的地点，观察光线的变化轨迹，然后在最佳时刻按下快门。后期处理以 Lightroom 为主，追求保留现场氛围的同时稍微强化光线的温暖感。色调偏暖、对比柔和，尽量还原肉眼当时所见的感受。',
+    result: '最终精选出 24 张作品，其中 6 张被摄影社区选为编辑推荐。这组作品让我意识到，好的街头摄影不在于追逐奇观，而在于用耐心去发现日常中被忽略的美。',
+    gallery: [
+      { src: '', alt: '城市暮光-01' },
+      { src: '', alt: '城市暮光-02' },
+      { src: '', alt: '城市暮光-03' },
+      { src: '', alt: '城市暮光-04' },
+    ],
+    video: null,
+    videos: [
+      { type: 'video', src: '', thumb: '', label: '城市暮光 · 幕后花絮' },
+    ],
+    tags: ['街头摄影', '纪实', '黄金时段', '光影'],
+  },
+  'photo-2': {
+    cover: '',
+    coverIcon: '🌊',
+    cat: 'photo',
+    catLabel: 'Photography',
+    title: '寂静海面',
+    subtitle: '风景系列 · 长曝光水面纹理',
+    author: 'Alex Chen',
+    date: '2025.06',
+    role: '摄影师 / 后期',
+    tools: 'Nikon Z8 · ND滤镜 · Lightroom',
+    origin: '一次海边旅行中，凌晨四点独自走向海边，海面如镜，天空从深蓝渐变为粉橘。那一刻的宁静感深深打动了我，于是决定用长曝光去捕捉海面的纹理与时间的流动。',
+    process: '在不同时间段、不同天气条件下多次前往海岸线拍摄。使用 ND 滤镜实现 30 秒至 2 分钟的长曝光，将海浪柔化为丝绸般的纹理。后期以冷色调为主，强化水面与天空之间的色彩过渡。',
+    result: '形成了一组 16 张的长曝光海景系列，其中"黎明前的三十秒"被杂志收录。整个系列传递出一种安静的、近乎冥想的氛围。',
+    gallery: [
+      { src: '', alt: '寂静海面-01' },
+      { src: '', alt: '寂静海面-02' },
+      { src: '', alt: '寂静海面-03' },
+    ],
+    video: null,
+    videos: [
+      { type: 'video', src: '', thumb: '', label: '寂静海面 · 拍摄记录' },
+    ],
+    tags: ['风景摄影', '长曝光', '海景', '宁静'],
+  },
+  'photo-3': {
+    cover: '',
+    coverIcon: '🏙',
+    cat: 'photo',
+    catLabel: 'Photography',
+    title: '几何建筑',
+    subtitle: '建筑摄影 · 光影与形态的对话',
+    author: 'Alex Chen',
+    date: '2024.11',
+    role: '摄影师',
+    tools: 'Sony A7IV · 16-35mm · Lightroom',
+    origin: '对建筑的兴趣始于一次偶然抬头——现代建筑的线条、重复的结构、光影的几何切割，构成了一种独特的视觉语言。我想用摄影的方式去"阅读"这些建筑，提取出它们最纯粹的形态之美。',
+    process: '走访了城市中十余座代表性建筑，从不同角度、不同时段拍摄。刻意避开人眼常见的平视视角，多用仰拍和局部特写来突出建筑的几何感。后期采用黑白与低饱和色调，剥离色彩干扰，让线条和光影成为唯一的主角。',
+    result: '一组 20 张的几何建筑系列，被建筑事务所选用为办公室装饰。这组作品证明了：当剥离色彩，建筑本身就是最抽象的艺术。',
+    gallery: [
+      { src: '', alt: '几何建筑-01' },
+      { src: '', alt: '几何建筑-02' },
+      { src: '', alt: '几何建筑-03' },
+      { src: '', alt: '几何建筑-04' },
+      { src: '', alt: '几何建筑-05' },
+      { src: '', alt: '几何建筑-06' },
+    ],
+    video: null,
+    videos: [],
+    tags: ['建筑摄影', '几何', '黑白', '极简'],
+  },
+  'game-1': {
+    cover: '',
+    coverIcon: '🎮',
+    cat: 'game',
+    catLabel: 'Game Art',
+    title: 'Neon Abyss — UI',
+    subtitle: '游戏界面设计 · 赛博朋克风格视觉系统',
+    author: 'Alex Chen · Leo Wang',
+    date: '2024.08',
+    role: 'UI设计师',
+    tools: 'Photoshop · Illustrator · Unity',
+    origin: '赛博朋克题材一直是我最爱的视觉风格，但很多游戏的 UI 只停留在"霓虹灯+暗色"的表面层面。我想设计一套从世界观出发的界面系统，让每一个按钮、每一个弹窗都像是游戏世界中真实存在的交互装置。',
+    process: '首先深入研究了赛博朋克文化的视觉基因——CRT 显示器的扫描线、街机厅的投币口、老式终端机的绿色字符。将这些元素提炼为设计语言：粗边框 + 扫描线纹理 + 荧光绿/洋红强调色。在 Unity 中实现动态效果：按钮按下时的闪烁反馈、弹窗出现的扫描线过渡动画。',
+    result: '为游戏设计了完整的 UI 系统，包含主菜单、HUD、背包、设置等 12 个界面模块。上线后玩家反馈"UI 就像游戏本身的一部分"，这正是我追求的效果。',
+    gallery: [
+      { src: '', alt: 'NeonAbyss-主菜单' },
+      { src: '', alt: 'NeonAbyss-HUD' },
+      { src: '', alt: 'NeonAbyss-背包' },
+      { src: '', alt: 'NeonAbyss-设置' },
+    ],
+    video: null,
+    videos: [
+      { type: 'video', src: '', thumb: '', label: 'Neon Abyss · UI 演示' },
+      { type: 'video', src: '', thumb: '', label: 'UI 交互动效' },
+    ],
+    tags: ['游戏UI', '赛博朋克', '界面设计', 'Unity'],
+  },
+  'game-2': {
+    cover: '',
+    coverIcon: '🌌',
+    cat: 'game',
+    catLabel: 'Game Art',
+    title: 'Starfield — Concept',
+    subtitle: '太空题材概念设计 · 场景与角色概念图',
+    author: 'Alex Chen · Mia Liu · Jet Zhang',
+    date: '2024.05',
+    role: '概念设计师',
+    tools: 'Photoshop · Blender · Procreate',
+    origin: '太空的深邃感与孤独感一直是我想在视觉上表达的母题。这个概念设计项目并不依附于某个具体游戏，而是一次纯粹的视觉探索——如果我要创造一个太空世界观，它会是什么样子？',
+    process: '从真实的天文摄影中汲取灵感，然后进行风格化处理。场景设计从氛围图入手，确定色调和光影方向，再细化到具体的建筑结构和飞行器设计。角色概念则侧重于太空服的功能性细节与人物性格的视觉暗示。Blender 用于快速搭建 3D 白模辅助透视。',
+    result: '产出了 8 张场景概念图和 4 套角色设计，建立了一套完整的视觉风格指南。这套概念设计后来被一个独立游戏团队参考采用。',
+    gallery: [
+      { src: '', alt: 'Starfield-场景01' },
+      { src: '', alt: 'Starfield-场景02' },
+      { src: '', alt: 'Starfield-角色01' },
+      { src: '', alt: 'Starfield-角色02' },
+    ],
+    video: null,
+    videos: [
+      { type: 'video', src: '', thumb: '', label: '概念设计过程' },
+    ],
+    tags: ['概念设计', '太空', '场景设计', 'Blender'],
+  },
+  'game-3': {
+    cover: '',
+    coverIcon: '⚔️',
+    cat: 'game',
+    catLabel: 'Game Art',
+    title: 'Hollow Realm — Key Art',
+    subtitle: '独立游戏宣传主视觉 · 暗黑奇幻风格',
+    author: 'Alex Chen',
+    date: '2024.02',
+    role: '主视觉设计师',
+    tools: 'Photoshop · Clip Studio Paint',
+    origin: '独立游戏团队找到我，希望为他们的暗黑奇幻风格游戏制作一张能传达游戏核心氛围的宣传主视觉。他们给了三个关键词：深渊、回响、裂隙。我需要用一张图讲完整个故事。',
+    process: '先与团队深入沟通游戏的世界观和核心叙事线，提炼出关键的视觉符号。草拟了 5 个构图方案，最终选择了以深渊裂缝为视觉中心、角色背影向光而行的构图。前期用灰度素描确定光影，再逐步叠加色彩和细节。暗黑奇幻的色调以深紫和暗金为主，但关键的光源处使用明亮的暖色形成强烈对比。',
+    result: '这张主视觉被用于 Steam 商店页、社交媒体宣传和线下展会展板，帮助游戏在发售前获得了超过预期的关注量。',
+    gallery: [
+      { src: '', alt: 'HollowRealm-主视觉' },
+      { src: '', alt: 'HollowRealm-草图' },
+      { src: '', alt: 'HollowRealm-细节' },
+    ],
+    video: null,
+    videos: [
+      { type: 'video', src: '', thumb: '', label: '主视觉绘制过程' },
+    ],
+    tags: ['主视觉', '暗黑奇幻', '游戏宣传', '数字绘画'],
+  },
+  'video-1': {
+    cover: '',
+    coverIcon: '🎬',
+    cat: 'video',
+    catLabel: 'Film / Video',
+    title: '碎片 · 短片',
+    subtitle: '个人实验短片 · 记忆与时间的叙事探索',
+    author: 'Alex Chen',
+    date: '2025.01',
+    role: '导演 / 剪辑',
+    tools: 'Premiere Pro · After Effects · DaVinci',
+    origin: '记忆从来不是线性的——它是碎片，是闪回，是某个气味突然唤起的画面。这部短片是对"记忆如何运作"的一次影像实验。我想用剪辑语言去模拟大脑回忆时的跳跃和重叠。',
+    process: '没有传统剧本，而是先收集了大量日常素材：窗外的雨、手指敲击桌面、地铁里模糊的人影。然后在剪辑台上以节奏和情绪为线索重新编排。使用 After Effects 制作叠化和光效，DaVinci 进行调色——整体色调偏冷，但记忆的闪回部分使用暖色调的过曝处理，形成视觉上的"温度差"。',
+    result: '短片时长 4 分 22 秒，入选了一个独立影像展的实验单元。观众反馈说"像是看到了自己某段说不清的记忆"，这正是我想要的效果。',
+    gallery: [
+      { src: '', alt: '碎片-截图01' },
+      { src: '', alt: '碎片-截图02' },
+      { src: '', alt: '碎片-截图03' },
+    ],
+    video: null,
+    videos: [
+      { type: 'video', src: '', thumb: '', label: '碎片 · 完整短片' },
+    ],
+    tags: ['实验短片', '影像', '记忆', '剪辑'],
+  },
+  'video-2': {
+    cover: '',
+    coverIcon: '📹',
+    cat: 'video',
+    catLabel: 'Film / Video',
+    title: '品牌宣传片 · Nova',
+    subtitle: '商业宣传片 · 科技品牌形象影片',
+    author: 'Alex Chen · Nova 品牌团队',
+    date: '2024.10',
+    role: '导演 / 后期总监',
+    tools: 'Premiere Pro · After Effects · Cinema 4D',
+    origin: 'Nova 是一家新兴的科技品牌，需要在产品发布前建立品牌认知。他们的需求很明确：不要传统企业宣传片的套路，要一部"有电影质感"的品牌影片，让人看完记住的不是产品参数，而是一种感觉。',
+    process: '从品牌理念"探索未知的勇气"出发，设计了三个叙事段落：沉入、浮起、抵达。拍摄在棚内完成，使用 LED 背景屏营造空间感。Cinema 4D 制作品牌元素的 3D 动态演绎，After Effects 合成光效和粒子。调色以冷蓝为基底，品牌标识出现时切入暖白光。',
+    result: '60 秒品牌片在社交媒体获得超 200 万播放，品牌方反馈"这是我们想要但说不出来的感觉"。后续追加了 15 秒和 6 秒的版本用于广告投放。',
+    gallery: [
+      { src: '', alt: 'Nova-截图01' },
+      { src: '', alt: 'Nova-截图02' },
+      { src: '', alt: 'Nova-截图03' },
+      { src: '', alt: 'Nova-截图04' },
+    ],
+    video: null,
+    videos: [
+      { type: 'video', src: '', thumb: '', label: '品牌宣传片 · 完整版' },
+      { type: 'video', src: '', thumb: '', label: '15秒广告版' },
+    ],
+    tags: ['品牌片', '商业视频', '科技', '3D合成'],
+  },
+  'video-3': {
+    cover: '',
+    coverIcon: '🎞',
+    cat: 'video',
+    catLabel: 'Film / Video',
+    title: '纪录片 · 匠人',
+    subtitle: '人文纪录片 · 传统手工艺人的一天',
+    author: 'Alex Chen · Sam Lin',
+    date: '2024.07',
+    role: '导演 / 摄影 / 剪辑',
+    tools: 'Sony FX6 · Premiere Pro · DaVinci',
+    origin: '在快速消费的时代，那些花一辈子只做一件事的人显得格外珍贵。这个纪录片项目源于一次偶然的采访经历——那位老匠人说起自己的手艺时眼里的光，让我决定要去记录更多这样的故事。',
+    process: '拍摄历时两周，跟随一位传统木雕匠人记录他的日常。清晨起床准备工作台、上午专注雕刻、午后接待老客户、傍晚在灯下打磨细节。采用自然光拍摄，尽量不干扰被拍摄者的节奏。剪辑保留了大量的环境声和沉默时刻，让观众能感受到手艺人的专注与时间流逝的质感。调色偏暖，保留木材和工具的自然色调。',
+    result: '12 分钟的纪录短片，在线上平台获得 10 万+ 播放。很多观众留言说"看完想回家看看爷爷奶奶"，这比任何数据都让我觉得有意义。',
+    gallery: [
+      { src: '', alt: '匠人-工作台' },
+      { src: '', alt: '匠人-雕刻' },
+      { src: '', alt: '匠人-成品' },
+      { src: '', alt: '匠人-傍晚' },
+      { src: '', alt: '匠人-手部特写' },
+      { src: '', alt: '匠人-工具' },
+    ],
+    video: null,
+    videos: [
+      { type: 'video', src: '', thumb: '', label: '纪录片 · 匠人 完整版' },
+    ],
+    tags: ['纪录片', '人文', '手工艺', '纪实'],
+  },
+};
+
+/* ============================================================
+   弹窗渲染逻辑
+   ============================================================ */
+function renderModal(id) {
+  const d = WORKS_DATA[id];
+  if (!d) return;
+
+  const body = document.getElementById('modalBody');
+  const coverPlaceholder = d.coverIcon || '📷';
+
+  // 判断画廊列数
+  const gLen = d.gallery ? d.gallery.length : 0;
+  const gCols = gLen <= 3 ? 'g-3' : gLen <= 4 ? 'g-2' : 'g-3';
+
+  let html = '';
+
+  // 封面
+  html += `<div class="modal-cover">`;
+  if (d.cover) {
+    html += `<img src="${d.cover}" alt="${d.title}" />`;
+  } else {
+    html += `<div class="modal-cover-placeholder">${coverPlaceholder}</div>`;
+  }
+  html += `</div>`;
+
+  // 信息头
+  html += `<div class="modal-info">`;
+  html += `<div class="modal-cat">${d.catLabel}</div>`;
+  html += `<h2 class="modal-title">${d.title}</h2>`;
+  html += `<div class="modal-subtitle">${d.subtitle}</div>`;
+  html += `<div class="modal-meta">`;
+  if (d.author) html += `<div class="modal-meta-item"><span class="modal-meta-label">作者</span><span class="modal-meta-value">${d.author}</span></div>`;
+  if (d.date) html += `<div class="modal-meta-item"><span class="modal-meta-label">创作时间</span><span class="modal-meta-value">${d.date}</span></div>`;
+  if (d.role) html += `<div class="modal-meta-item"><span class="modal-meta-label">角色</span><span class="modal-meta-value">${d.role}</span></div>`;
+  if (d.tools) html += `<div class="modal-meta-item"><span class="modal-meta-label">工具</span><span class="modal-meta-value">${d.tools}</span></div>`;
+  html += `</div></div>`;
+
+  // 项目缘由
+  if (d.origin) {
+    html += `<div class="modal-section">`;
+    html += `<div class="modal-section-title">项目缘由</div>`;
+    html += `<p>${d.origin}</p></div>`;
+  }
+
+  // 设计过程
+  if (d.process) {
+    html += `<div class="modal-section">`;
+    html += `<div class="modal-section-title">设计过程</div>`;
+    html += `<p>${d.process}</p></div>`;
+  }
+
+  // 视频区 — 支持多个视频
+  const videos = d.videos || (d.video ? [d.video] : []);
+  if (videos.length > 0) {
+    html += `<div class="modal-section">`;
+    html += `<div class="modal-section-title">视频展示</div>`;
+    const vCols = videos.length === 1 ? 'v-1' : videos.length === 2 ? 'v-2' : 'v-3';
+    if (videos.length === 1 && videos[0].src && !videos[0].thumb) {
+      // 单视频直接内嵌播放
+      html += `<div class="modal-video-wrap">`;
+      if (videos[0].type === 'iframe') {
+        html += `<iframe src="${videos[0].src}" allowfullscreen></iframe>`;
+      } else {
+        html += `<video src="${videos[0].src}" controls></video>`;
+      }
+      html += `</div>`;
+    } else {
+      // 多视频或带缩略图 → 网格卡片（点击全屏播放）
+      html += `<div class="modal-videos ${vCols}">`;
+      videos.forEach((v, vi) => {
+        html += `<div class="modal-video-card" onclick="openVideoLightbox(${vi})">`;
+        if (v.thumb) {
+          html += `<img src="${v.thumb}" alt="${v.label || '视频' + (vi+1)}" />`;
+        } else {
+          html += `<div class="video-placeholder">🎬</div>`;
+        }
+        html += `<div class="video-play-btn"><svg width="18" height="18" fill="#fff" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`;
+        if (v.label) html += `<div class="video-card-label">${v.label}</div>`;
+        html += `</div>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // 图片画廊
+  if (d.gallery && d.gallery.length > 0) {
+    html += `<div class="modal-section">`;
+    html += `<div class="modal-section-title">项目图集</div>`;
+    html += `<div class="modal-gallery ${gCols}">`;
+    d.gallery.forEach((g, gi) => {
+      if (g.src) {
+        html += `<div class="modal-gallery-item" onclick="openLightbox('${g.src}')">`;
+        html += `<img src="${g.src}" alt="${g.alt}" loading="lazy" />`;
+        html += `<div class="gallery-zoom-hint"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg></div>`;
+      } else {
+        html += `<div class="modal-gallery-item">`;
+        html += `<div class="gallery-placeholder">🖼</div>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // 项目成果
+  if (d.result) {
+    html += `<div class="modal-section">`;
+    html += `<div class="modal-section-title">项目成果</div>`;
+    html += `<p>${d.result}</p></div>`;
+  }
+
+  // 标签
+  if (d.tags && d.tags.length > 0) {
+    html += `<div class="modal-tags">`;
+    d.tags.forEach(t => { html += `<span class="modal-tag">${t}</span>`; });
+    html += `</div>`;
+  }
+
+  body.innerHTML = html;
+}
+
+/* ---- 打开/关闭弹窗 ---- */
+const modal = document.getElementById('projectModal');
+
+function openModal(id) {
+  renderModal(id);
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e => {
+  if (e.target === modal) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+});
+
+/* ---- 灯箱 ---- */
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+
+function openLightbox(src) {
+  // 清空之前内容，只保留 img
+  lightbox.innerHTML = '';
+  const img = document.createElement('img');
+  img.src = src; img.alt = '预览';
+  img.style.cssText = 'max-width:90vw;max-height:85vh;object-fit:contain;border-radius:4px;';
+  lightbox.appendChild(img);
+  const hint = document.createElement('div');
+  hint.className = 'lightbox-close-hint';
+  hint.textContent = '点击任意位置关闭';
+  lightbox.appendChild(hint);
+  lightbox.classList.add('open');
+}
+
+function openVideoLightbox(index) {
+  // 获取当前作品数据
+  const activeId = document.querySelector('.work-item[data-id]')?.dataset.id;
+  // 从 modal 当前展示的内容反推 id
+  const modalTitle = document.querySelector('.modal-title');
+  if (!modalTitle) return;
+  // 找到对应的 videos 数组
+  let targetVideos = null;
+  for (const [id, d] of Object.entries(WORKS_DATA)) {
+    if (d.title === modalTitle.textContent) {
+      targetVideos = d.videos || (d.video ? [d.video] : []);
+      break;
+    }
+  }
+  if (!targetVideos || !targetVideos[index]) return;
+  const v = targetVideos[index];
+
+  lightbox.innerHTML = '';
+  if (v.type === 'iframe') {
+    const iframe = document.createElement('iframe');
+    iframe.src = v.src; iframe.allowFullscreen = true;
+    iframe.style.cssText = 'width:90vw;height:80vh;border:none;border-radius:6px;';
+    lightbox.appendChild(iframe);
+  } else {
+    const video = document.createElement('video');
+    video.src = v.src; video.controls = true; video.autoplay = true;
+    video.style.cssText = 'max-width:90vw;max-height:85vh;border-radius:6px;outline:none;';
+    lightbox.appendChild(video);
+  }
+  const hint = document.createElement('div');
+  hint.className = 'lightbox-close-hint';
+  hint.textContent = '点击空白处关闭';
+  lightbox.appendChild(hint);
+  lightbox.classList.add('open');
+  lightbox.style.cursor = 'default';
+  // 阻止点击视频本身时关闭
+  lightbox.querySelector('iframe, video')?.addEventListener('click', e => e.stopPropagation());
+}
+
+lightbox.addEventListener('click', () => {
+  lightbox.classList.remove('open');
+  // 停止视频播放
+  lightbox.querySelectorAll('video').forEach(v => v.pause());
+  lightbox.innerHTML = '';
+  lightbox.style.cursor = '';
+});
+
+/* ---- 点击作品卡片 → 打开弹窗 ---- */
+document.querySelectorAll('.work-item[data-id]').forEach(item => {
+  item.addEventListener('click', () => openModal(item.dataset.id));
+});
 
 /* ---- 生成筛选按钮 ---- */
 (function() {
