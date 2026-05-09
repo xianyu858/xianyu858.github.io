@@ -1780,5 +1780,238 @@ document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 /* Hero 立即触发 */
 setTimeout(() => document.querySelectorAll('#hero .reveal').forEach(el => el.classList.add('in')), 60);
 </script>
+
+<!-- ============================================================
+     管理面板（按 Ctrl+Shift+A 打开，密码：xianyu2026）
+     ============================================================ -->
+<div id="adminOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;backdrop-filter:blur(6px);justify-content:center;align-items:center;">
+  <div id="adminPanel" style="background:var(--c-bg,#f8f7f4);width:min(800px,95vw);max-height:92vh;overflow-y:auto;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);padding:36px 40px;font-family:var(--f-body,'DM Sans',sans-serif);color:var(--c-text,#0e0e0e);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;">
+      <h2 style="font-family:var(--f-display,'Space Grotesk',sans-serif);font-size:22px;font-weight:600;">作品管理面板</h2>
+      <button onclick="closeAdmin()" style="font-size:22px;color:var(--c-muted,.42);background:none;border:none;cursor:pointer;">✕</button>
+    </div>
+
+    <!-- 上传区 -->
+    <div style="background:var(--c-surface,#fff);border:1px solid var(--c-border,rgba(0,0,0,.08));border-radius:12px;padding:24px;margin-bottom:24px;">
+      <h3 style="font-size:14px;font-weight:500;margin-bottom:14px;color:var(--c-muted,.42);text-transform:uppercase;letter-spacing:.12em;">① 上传图片到 Cloudinary</h3>
+      <div id="uploadWidgetBox" style="min-height:44px;">
+        <button onclick="openCloudinaryUpload()" style="padding:10px 24px;background:var(--c-accent,#1a1a1a);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;">选择图片上传</button>
+        <span style="margin-left:12px;font-size:13px;color:var(--c-muted,.42);">上传后图片链接会自动填入下方表单</span>
+      </div>
+      <div id="uploadedUrls" style="margin-top:14px;"></div>
+    </div>
+
+    <!-- 作品信息表单 -->
+    <div style="background:var(--c-surface,#fff);border:1px solid var(--c-border,rgba(0,0,0,.08));border-radius:12px;padding:24px;margin-bottom:24px;">
+      <h3 style="font-size:14px;font-weight:500;margin-bottom:14px;color:var(--c-muted,.42);text-transform:uppercase;letter-spacing:.12em;">② 填写作品信息</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div><label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">作品 ID（英文，如 photo-2）</label><input id="f_id" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);" placeholder="photo-2" /></div>
+        <div><label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">分类</label><select id="f_cat" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);"><option value="photo">摄影 Photography</option><option value="game">游戏 Game Art</option><option value="video">视频 Film/Video</option></select></div>
+        <div><label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">标题</label><input id="f_title" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);" placeholder="作品标题" /></div>
+        <div><label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">副标题</label><input id="f_subtitle" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);" placeholder="作品副标题 / 简述" /></div>
+        <div><label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">作者（多人用 · 分隔）</label><input id="f_author" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);" placeholder="唐一桐" /></div>
+        <div><label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">创作时间</label><input id="f_date" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);" placeholder="2026.03.25" /></div>
+        <div><label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">角色</label><input id="f_role" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);" placeholder="摄影师 / 后期" /></div>
+        <div><label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">工具</label><input id="f_tools" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);" placeholder="Sony A7IV · Lightroom" /></div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">封面图（粘贴 Cloudinary 链接）</label>
+        <input id="f_cover" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:13px;background:var(--c-bg,#f8f7f4);" placeholder="https://res.cloudinary.com/.../image/upload/..." />
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">图集图片链接（每行一个链接）</label>
+        <textarea id="f_gallery" rows="4" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:13px;background:var(--c-bg,#f8f7f4);resize:vertical;" placeholder="https://res.cloudinary.com/.../image1.jpg&#10;https://res.cloudinary.com/.../image2.jpg"></textarea>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">项目缘由</label>
+        <textarea id="f_origin" rows="3" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);resize:vertical;"></textarea>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">设计过程</label>
+        <textarea id="f_process" rows="3" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);resize:vertical;"></textarea>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">项目成果</label>
+        <textarea id="f_result" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);resize:vertical;"></textarea>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--c-muted,.42);display:block;margin-bottom:4px;">标签（逗号分隔）</label>
+        <input id="f_tags" style="width:100%;padding:9px 12px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:8px;font-size:14px;background:var(--c-bg,#f8f7f4);" placeholder="阴天, 情绪摄影, 自然光" />
+      </div>
+      <button onclick="generateCode()" style="padding:10px 28px;background:var(--c-accent,#1a1a1a);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;">生成代码</button>
+    </div>
+
+    <!-- 生成结果 -->
+    <div id="codeOutput" style="display:none;background:var(--c-surface,#fff);border:1px solid var(--c-border,rgba(0,0,0,.08));border-radius:12px;padding:24px;margin-bottom:24px;">
+      <h3 style="font-size:14px;font-weight:500;margin-bottom:14px;color:var(--c-muted,.42);text-transform:uppercase;letter-spacing:.12em;">③ 复制以下代码，粘贴到 GitHub index.html 的 WORKS_DATA 中</h3>
+      <div style="margin-bottom:12px;">
+        <h4 style="font-size:13px;font-weight:500;margin-bottom:6px;">WORKS_DATA 代码片段（插入到对应分类区域）</h4>
+        <pre id="codeSnippet" style="background:var(--c-inv-bg,#111);color:var(--c-inv-text,#fff);padding:16px;border-radius:8px;font-size:12px;line-height:1.6;overflow-x:auto;white-space:pre;"></pre>
+        <button onclick="copyCode()" style="margin-top:10px;padding:8px 20px;background:var(--c-accent,#1a1a1a);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;">复制代码</button>
+        <span id="copyTip" style="margin-left:10px;font-size:13px;color:var(--c-muted,.42);"></span>
+      </div>
+      <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--c-border,rgba(0,0,0,.08));">
+        <h4 style="font-size:13px;font-weight:500;margin-bottom:6px;">首页卡片 HTML 片段（插入到 index.html 作品网格中）</h4>
+        <pre id="cardSnippet" style="background:var(--c-inv-bg,#111);color:var(--c-inv-text,#fff);padding:16px;border-radius:8px;font-size:12px;line-height:1.6;overflow-x:auto;white-space:pre;"></pre>
+        <button onclick="copyCard()" style="margin-top:10px;padding:8px 20px;background:var(--c-accent,#1a1a1a);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;">复制卡片代码</button>
+        <span id="copyCardTip" style="margin-left:10px;font-size:13px;color:var(--c-muted,.42);"></span>
+      </div>
+    </div>
+
+    <p style="font-size:12px;color:var(--c-muted,.42);text-align:center;">密码：xianyu2026 ｜ 快捷键打开：Ctrl+Shift+A</p>
+  </div>
+</div>
+
+<script>
+/* ---- 管理面板逻辑 ---- */
+const ADMIN_PW = 'xianyu2026';
+
+function openAdminPanel() {
+  document.getElementById('adminOverlay').style.display = 'flex';
+  if (!window._cloudinaryReady) {
+    const s = document.createElement('script');
+    s.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+    s.onload = () => { window._cloudinaryReady = true; };
+    document.body.appendChild(s);
+  }
+}
+function closeAdmin() {
+  document.getElementById('adminOverlay').style.display = 'none';
+}
+
+/* 快捷键 Ctrl+Shift+A */
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+    e.preventDefault();
+    const pw = prompt('请输入管理密码：');
+    if (pw === ADMIN_PW) openAdminPanel();
+    else if (pw) alert('密码错误！');
+  }
+});
+
+/* Cloudinary 上传 */
+function openCloudinaryUpload() {
+  if (!window.cloudinary) { alert('Cloudinary 脚本加载中，请稍后再试'); return; }
+  window.cloudinary.openUploadWidget({
+    cloudName: 'dgscayu2k',
+    uploadPreset: 'ml_cam',
+    sources: ['local', 'url', 'camera'],
+    multiple: true,
+    maxFiles: 20,
+    styles: { palette: { window: '#f8f7f4', sourceBg: '#fff', tabIcon: '#1a1a1a' } }
+  }, (err, result) => {
+    if (err) return;
+    if (result.event === 'success') {
+      const url = result.info.secure_url;
+      const box = document.getElementById('uploadedUrls');
+      const row = document.createElement('div');
+      row.style = 'display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;';
+      row.innerHTML = '<span style="color:var(--c-muted,.42);">✓</span>'
+        + '<input value="' + url + '" readonly style="flex:1;padding:6px 10px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:6px;font-size:12px;background:var(--c-bg,#f8f7f4);" onclick="this.select();document.execCommand(\'copy\');" title="点击复制">'
+        + '<button onclick="useAsCover(this)" style="padding:4px 10px;font-size:12px;border:1px solid var(--c-border2);border-radius:6px;cursor:pointer;background:#fff;">用作封面</button>'
+        + '<button onclick="addToGallery(this)" style="padding:4px 10px;font-size:12px;border:1px solid var(--c-border2);border-radius:6px;cursor:pointer;background:#fff;">加入图集</button>';
+      box.appendChild(row);
+    }
+  });
+}
+
+function useAsCover(btn) {
+  const url = btn.parentElement.querySelector('input').value;
+  document.getElementById('f_cover').value = url;
+  alert('已填入封面图链接');
+}
+function addToGallery(btn) {
+  const url = btn.parentElement.querySelector('input').value;
+  const ta = document.getElementById('f_gallery');
+  ta.value = ta.value ? ta.value + '\n' + url : url;
+  alert('已添加到图集列表');
+}
+
+/* 生成代码 */
+function generateCode() {
+  const id = document.getElementById('f_id').value.trim() || 'photo-new';
+  const cat = document.getElementById('f_cat').value;
+  const catLabel = { photo: 'Photography', game: 'Game Art', video: 'Film / Video' }[cat];
+  const title = document.getElementById('f_title').value.trim() || '新作品';
+  const subtitle = document.getElementById('f_subtitle').value.trim();
+  const author = document.getElementById('f_author').value.trim();
+  const date = document.getElementById('f_date').value.trim();
+  const role = document.getElementById('f_role').value.trim();
+  const tools = document.getElementById('f_tools').value.trim();
+  const cover = document.getElementById('f_cover').value.trim();
+  const origin = document.getElementById('f_origin').value.trim();
+  const process = document.getElementById('f_process').value.trim();
+  const result = document.getElementById('f_result').value.trim();
+  const tagsStr = document.getElementById('f_tags').value.trim();
+  const tags = tagsStr ? tagsStr.split(/[,，]/).map(t => t.trim()).filter(Boolean) : [];
+
+  const galleryLines = [];
+  const galleryRaw = document.getElementById('f_gallery').value.trim();
+  if (galleryRaw) {
+    galleryRaw.split('\n').forEach((line, i) => {
+      const url = line.trim();
+      if (url) galleryLines.push('      { src: \'' + url + '\', alt: \'' + title + '-' + String(i+1).padStart(2,'0') + '\' },');
+    });
+  }
+
+  const iconMap = { photo: '\u{1F4F8}', game: '\u{1F3AE}', video: '\u{1F3AC}' };
+  const code = '  \'' + id + '\': {\n' +
+    '    cover: \'' + cover + '\',\n' +
+    '    coverIcon: \'' + (iconMap[cat]||'\u{1F3AC}') + '\',\n' +
+    '    cat: \'' + cat + '\',\n' +
+    '    catLabel: \'' + catLabel + '\',\n' +
+    '    title: \'' + title + '\',\n' +
+    '    subtitle: \'' + subtitle + '\',\n' +
+    '    author: \'' + author + '\',\n' +
+    '    date: \'' + date + '\',\n' +
+    '    role: \'' + role + '\',\n' +
+    '    tools: \'' + tools + '\',\n' +
+    '    origin: \'' + origin + '\',\n' +
+    '    process: \'' + process + '\',\n' +
+    '    result: \'' + result + '\',\n' +
+    '    gallery: [\n' +
+    galleryLines.join('\n') + '\n' +
+    '    ],\n' +
+    '    video: null,\n' +
+    '    videos: [],\n' +
+    '    tags: ' + JSON.stringify(tags) + ',\n' +
+    '  },';
+
+  document.getElementById('codeSnippet').textContent = code;
+  document.getElementById('codeOutput').style.display = 'block';
+
+  /* 卡片代码 */
+  const iconMap2 = { photo: '\u{1F4F8}', game: '\u{1F3AE}', video: '\u{1F3AC}' };
+  const cardIcon = iconMap2[cat] || '\u{1F3AC}';
+  const coverStyle = cover ? 'style="background-image:url(\'' + cover + '\');background-size:cover;background-position:center;"' : '';
+  const iconStyle = cover ? 'style="display:none"' : '';
+  const cardCode = '      <div class="work-item reveal d1" data-cat="' + cat + '" data-id="' + id + '">\n' +
+    '        <div class="work-cover cover-1" ' + coverStyle + '><div class="work-cover-icon" ' + iconStyle + '>' + cardIcon + '</div></div>\n' +
+    '        <div class="work-overlay">\n' +
+    '          <div class="work-cat-tag">' + catLabel + '</div>\n' +
+    '          <div class="work-title">' + title + '</div>\n' +
+    '          <div class="work-desc-sm">' + subtitle + '</div>\n' +
+    '        </div>\n' +
+    '        <div class="work-index">XX</div>\n' +
+    '      </div>';
+  document.getElementById('cardSnippet').textContent = cardCode;
+}
+
+function copyCode() {
+  const text = document.getElementById('codeSnippet').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('copyTip').textContent = '已复制！';
+    setTimeout(() => document.getElementById('copyTip').textContent = '', 2000);
+  });
+}
+function copyCard() {
+  const text = document.getElementById('cardSnippet').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('copyTip').textContent = '已复制！';
+    setTimeout(() => document.getElementById('copyTip').textContent = '', 2000);
+  });
+}
+</script>
+
 </body>
 </html>
