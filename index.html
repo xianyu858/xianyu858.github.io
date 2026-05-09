@@ -954,17 +954,8 @@ footer {
 
     <div class="works-grid" id="worksGrid">
       <!-- 摄影 -->
-            <div class="work-item reveal d1" data-cat="photo" data-id="photo-new">
-        <div class="work-cover cover-1" style="background-image:url('https://res.cloudinary.com/dgscayu2k/image/upload/v1778345397/pypvmx170z6bk9dsbmac.jpg');background-size:cover;background-position:center;"><div class="work-cover-icon" style="display:none">📷</div></div>
-        <div class="work-overlay">
-          <div class="work-cat-tag">Photography</div>
-          <div class="work-title">新作品</div>
-          <div class="work-desc-sm"></div>
-        </div>
-        <div class="work-index">XX</div>
-      </div>
       <div class="work-item reveal d1" data-cat="photo" data-id="photo-1">
-        <div class="work-cover cover-1" style="background-image:url('images/photo-1/photo-1-1.jpg');background-size:cover;background-position:center;"><div class="work-cover-icon" style="display:none">📷</div></div>
+        <div class="work-cover cover-1"><div class="work-cover-icon">📷</div></div>
         <div class="work-overlay">
           <div class="work-cat-tag">Photography</div>
           <div class="work-title">破碎的阴天</div>
@@ -1270,29 +1261,9 @@ const CATEGORY_CONFIG = {
                   （有 thumb 时显示缩略图卡片+播放按钮，点击可全屏播放）
    tags        → 标签数组
    ============================================================ */
-const WORKS_DATA = {  'photo-new': {
-    cover: 'https://res.cloudinary.com/dgscayu2k/image/upload/v1778345397/pypvmx170z6bk9dsbmac.jpg',
-    coverIcon: '📷',
-    cat: 'photo',
-    catLabel: 'Photography',
-    title: '新作品',
-    subtitle: '',
-    author: '',
-    date: '',
-    role: '',
-    tools: '',
-    origin: '',
-    process: '',
-    result: '',
-    gallery: [
-      { src: 'https://res.cloudinary.com/dgscayu2k/image/upload/v1778345395/b9hhtldkny3yui9qxezs.jpg', alt: '新作品-01' },
-    ],
-    video: null,
-    videos: [],
-    tags: [],
-  },
+const WORKS_DATA = {
   'photo-1': {
-    cover: 'images/photo-1/photo-1-1.jpg',
+    cover: '',
     coverIcon: '📷',
     cat: 'photo',
     catLabel: 'Photography',
@@ -1306,11 +1277,11 @@ const WORKS_DATA = {  'photo-new': {
     process: '利用阴天特有的柔和漫射光，刻意避开晴天摄影的高反差思路，转而寻找阴天中独特的层次感与色彩微妙变化。后期以保留现场氛围为主，轻度处理，尽量还原当天天空的灰蓝色调与空间中弥散的雾感。',
     result: '这组影像呈现出一种安静、内敛、略带忧郁的气质。破碎的阴云并不代表遗憾，而是另一种美的方式——不是明媚，而是沉静。',
     gallery: [
-      { src: 'images/photo-1/photo-1-1.jpg', alt: '破碎的阴天-01' },
-      { src: 'images/photo-1/photo-1-2.png', alt: '破碎的阴天-02' },
-      { src: 'images/photo-1/photo-1-3.png', alt: '破碎的阴天-03' },
-      { src: 'images/photo-1/photo-1-4.jpg', alt: '破碎的阴天-04' },
-      { src: 'images/photo-1/photo-1-5.png', alt: '破碎的阴天-05' },
+      { src: '', alt: '破碎的阴天-01' },
+      { src: '', alt: '破碎的阴天-02' },
+      { src: '', alt: '破碎的阴天-03' },
+      { src: '', alt: '破碎的阴天-04' },
+      { src: '', alt: '破碎的阴天-05' },
     ],
     video: null,
     videos: [],
@@ -1894,54 +1865,86 @@ setTimeout(() => document.querySelectorAll('#hero .reveal').forEach(el => el.cla
 <script>
 /* ---- 管理面板逻辑 ---- */
 const ADMIN_PW = 'xianyu2026';
+const CLOUD_NAME = 'dgscayu2k';
+const UPLOAD_PRESET = 'ml_cam';
 
 function openAdminPanel() {
   document.getElementById('adminOverlay').style.display = 'flex';
-  if (!window._cloudinaryReady) {
-    const s = document.createElement('script');
-    s.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
-    s.onload = () => { window._cloudinaryReady = true; };
-    document.body.appendChild(s);
-  }
 }
 function closeAdmin() {
   document.getElementById('adminOverlay').style.display = 'none';
 }
 
 /* 快捷键 Ctrl+Shift+A */
-document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.shiftKey && (e.key === 'a' || e.key === 'A')) {
     e.preventDefault();
-    const pw = prompt('请输入管理密码：');
-    if (pw === ADMIN_PW) openAdminPanel();
-    else if (pw) alert('密码错误！');
+    var pw = prompt('请输入管理密码：');
+    if (pw === ADMIN_PW) { openAdminPanel(); }
+    else if (pw) { alert('密码错误！'); }
   }
 });
 
-/* Cloudinary 上传 */
+/* 直接上传到 Cloudinary（无需 Widget，兼容 file:// 协议） */
 function openCloudinaryUpload() {
-  if (!window.cloudinary) { alert('Cloudinary 脚本加载中，请稍后再试'); return; }
-  window.cloudinary.openUploadWidget({
-    cloudName: 'dgscayu2k',
-    uploadPreset: 'ml_cam',
-    sources: ['local', 'url', 'camera'],
-    multiple: true,
-    maxFiles: 20,
-    styles: { palette: { window: '#f8f7f4', sourceBg: '#fff', tabIcon: '#1a1a1a' } }
-  }, (err, result) => {
-    if (err) return;
-    if (result.event === 'success') {
-      const url = result.info.secure_url;
-      const box = document.getElementById('uploadedUrls');
-      const row = document.createElement('div');
-      row.style = 'display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;';
-      row.innerHTML = '<span style="color:var(--c-muted,.42);">✓</span>'
-        + '<input value="' + url + '" readonly style="flex:1;padding:6px 10px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:6px;font-size:12px;background:var(--c-bg,#f8f7f4);" onclick="this.select();document.execCommand(\'copy\');" title="点击复制">'
-        + '<button onclick="useAsCover(this)" style="padding:4px 10px;font-size:12px;border:1px solid var(--c-border2);border-radius:6px;cursor:pointer;background:#fff;">用作封面</button>'
-        + '<button onclick="addToGallery(this)" style="padding:4px 10px;font-size:12px;border:1px solid var(--c-border2);border-radius:6px;cursor:pointer;background:#fff;">加入图集</button>';
-      box.appendChild(row);
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,video/*';
+  input.multiple = true;
+  input.onchange = function() {
+    var files = input.files;
+    for (var i = 0; i < files.length; i++) {
+      uploadToCloudinary(files[i]);
     }
+  };
+  input.click();
+}
+
+function uploadToCloudinary(file) {
+  var formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', UPLOAD_PRESET);
+
+  // 显示上传中状态
+  var box = document.getElementById('uploadedUrls');
+  var row = document.createElement('div');
+  row.style = 'display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;';
+  row.innerHTML = '<span style="color:#999;">⏳ 上传中...</span>'
+    + '<span style="font-size:12px;color:#999;">' + file.name + '</span>';
+  box.appendChild(row);
+
+  fetch('https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/auto/upload', {
+    method: 'POST',
+    body: formData
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.secure_url) {
+      row.innerHTML = '<span style="color:green;">✓</span>'
+        + '<input value="' + data.secure_url + '" readonly style="flex:1;padding:6px 10px;border:1px solid var(--c-border2,rgba(0,0,0,.14));border-radius:6px;font-size:12px;background:var(--c-bg,#f8f7f4);" onclick="this.select();document.execCommand(\'copy\');" title="点击复制">'
+        + '<button onclick="useAsCover(this)" style="padding:4px 10px;font-size:12px;border:1px solid var(--c-border2);border-radius:6px;cursor:pointer;background:#fff;">封面</button>'
+        + '<button onclick="addToGallery(this)" style="padding:4px 10px;font-size:12px;border:1px solid var(--c-border2);border-radius:6px;cursor:pointer;background:#fff;">图集</button>';
+    } else {
+      row.innerHTML = '<span style="color:red;">✗ 上传失败</span>'
+        + '<span style="font-size:12px;color:#999;">' + file.name + '</span>';
+    }
+  })
+  .catch(function() {
+    row.innerHTML = '<span style="color:red;">✗ 网络错误</span>'
+      + '<span style="font-size:12px;color:#999;">' + file.name + '</span>';
   });
+}
+
+function useAsCover(btn) {
+  var url = btn.parentElement.querySelector('input').value;
+  document.getElementById('f_cover').value = url;
+  alert('已填入封面图链接');
+}
+function addToGallery(btn) {
+  var url = btn.parentElement.querySelector('input').value;
+  var ta = document.getElementById('f_gallery');
+  ta.value = ta.value ? ta.value + '\n' + url : url;
+  alert('已添加到图集列表');
 }
 
 function useAsCover(btn) {
@@ -1983,10 +1986,10 @@ function generateCode() {
     });
   }
 
-  const iconMap = { photo: '\u{1F4F8}', game: '\u{1F3AE}', video: '\u{1F3AC}' };
+  const iconMap = { photo: '📷', game: '🎮', video: '🎬' };
   const code = '  \'' + id + '\': {\n' +
     '    cover: \'' + cover + '\',\n' +
-    '    coverIcon: \'' + (iconMap[cat]||'\u{1F3AC}') + '\',\n' +
+    '    coverIcon: \'' + (iconMap[cat]||'🎬') + '\',\n' +
     '    cat: \'' + cat + '\',\n' +
     '    catLabel: \'' + catLabel + '\',\n' +
     '    title: \'' + title + '\',\n' +
@@ -2010,8 +2013,8 @@ function generateCode() {
   document.getElementById('codeOutput').style.display = 'block';
 
   /* 卡片代码 */
-  const iconMap2 = { photo: '\u{1F4F8}', game: '\u{1F3AE}', video: '\u{1F3AC}' };
-  const cardIcon = iconMap2[cat] || '\u{1F3AC}';
+  const iconMap2 = { photo: '📷', game: '🎮', video: '🎬' };
+  const cardIcon = iconMap2[cat] || '🎬';
   const coverStyle = cover ? 'style="background-image:url(\'' + cover + '\');background-size:cover;background-position:center;"' : '';
   const iconStyle = cover ? 'style="display:none"' : '';
   const cardCode = '      <div class="work-item reveal d1" data-cat="' + cat + '" data-id="' + id + '">\n' +
