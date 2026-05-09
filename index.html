@@ -954,6 +954,15 @@ footer {
 
     <div class="works-grid" id="worksGrid">
       <!-- 摄影 -->
+            <div class="work-item reveal d1" data-cat="photo" data-id="photo-new">
+        <div class="work-cover cover-1" style="background-image:url('https://res.cloudinary.com/dgscayu2k/image/upload/v1778345397/pypvmx170z6bk9dsbmac.jpg');background-size:cover;background-position:center;"><div class="work-cover-icon" style="display:none">📷</div></div>
+        <div class="work-overlay">
+          <div class="work-cat-tag">Photography</div>
+          <div class="work-title">新作品</div>
+          <div class="work-desc-sm"></div>
+        </div>
+        <div class="work-index">XX</div>
+      </div>
       <div class="work-item reveal d1" data-cat="photo" data-id="photo-1">
         <div class="work-cover cover-1" style="background-image:url('images/photo-1/photo-1-1.jpg');background-size:cover;background-position:center;"><div class="work-cover-icon" style="display:none">📷</div></div>
         <div class="work-overlay">
@@ -1261,7 +1270,27 @@ const CATEGORY_CONFIG = {
                   （有 thumb 时显示缩略图卡片+播放按钮，点击可全屏播放）
    tags        → 标签数组
    ============================================================ */
-const WORKS_DATA = {
+const WORKS_DATA = {  'photo-new': {
+    cover: 'https://res.cloudinary.com/dgscayu2k/image/upload/v1778345397/pypvmx170z6bk9dsbmac.jpg',
+    coverIcon: '📷',
+    cat: 'photo',
+    catLabel: 'Photography',
+    title: '新作品',
+    subtitle: '',
+    author: '',
+    date: '',
+    role: '',
+    tools: '',
+    origin: '',
+    process: '',
+    result: '',
+    gallery: [
+      { src: 'https://res.cloudinary.com/dgscayu2k/image/upload/v1778345395/b9hhtldkny3yui9qxezs.jpg', alt: '新作品-01' },
+    ],
+    video: null,
+    videos: [],
+    tags: [],
+  },
   'photo-1': {
     cover: 'images/photo-1/photo-1-1.jpg',
     coverIcon: '📷',
